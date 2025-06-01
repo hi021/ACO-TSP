@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    background: linear-gradient(130deg, transparent, rgba(160, 160, 255, 0.25) 85%),
+        linear-gradient(230deg, transparent, rgba(255, 160, 160, 0.25) 85%);
+}
+
+button {
+    cursor: pointer;
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ant Colony Optimization</title>
+    <link rel="stylesheet" href="target/styles.css"/>
+    <link rel="icon" href="favicon.png" type="image/png"/>
+</head>
+
+<body class="min-h-[100vh] bg-violet-950 text-neutral-200 font-sans">
+    <div class="backdrop"></div>
+    <div class="bg-linear-120 from-indigo-700/35 to-pink-700/35 px-6 py-4 mb-8 rounded-b-lg shadow-lg text-lg font-bold">Travelling Salesman Problem</div>
+
+    <main class="grid grid-cols-1 2xl:grid-cols-[minmax(200px,420px)_700px_minmax(420px,640px)] justify-between gap-4 px-8 mx-auto">
+        <div class="flex flex-col gap-2 p-2 backdrop-blur-sm rounded-lg shadow-lg bg-white/15">
+            <label class="flex flex-col justify-start text-sm text-neutral-300 accent-pink-600">
+                Iteration count
+                <span class="inline-flex flex-row items-center gap-2">
+                    <input class="w-full" id="iteration-range" type="range" min="1" max="200"/>
+                    <input id="iteration-input" type="number" min="1" max="200" step="1"/>
+                </span>
+            </label>
+
+            <label class="flex flex-col justify-start text-sm text-neutral-300 accent-pink-600">
+                Ant count
+                <span class="inline-flex flex-row items-center gap-2">
+                    <input class="w-full" id="ant-count-range" type="range" min="1" max="200"/>
+                    <input id="ant-count-input" type="number" min="1" max="200" step="1"/>
+                </span>
+            </label>
+
+            <label class="flex flex-col justify-start text-sm text-neutral-300 accent-pink-600">
+                Pheromone importance (α)
+                <span class="inline-flex flex-row items-center gap-2">
+                    <input class="w-full" id="pheromone-range" type="range" min="0" max="10" step="0.1"/>
+                    <input id="pheromone-input" type="number" min="0" max="10" step="0.1"/>
+                </span>
+            </label>
+
+            <label class="flex flex-col justify-start text-sm text-neutral-300 accent-pink-600">
+                Distance priority (β)
+                <span class="inline-flex flex-row items-center gap-2">
+                    <input class="w-full" id="distance-range" type="range" min="1" max="10" step="0.1"/>
+                    <input id="distance-input" type="number" min="1" max="10" step="0.1"/>
+                </span>
+            </label>
+
+            <label class="flex flex-col justify-start text-sm text-neutral-300 accent-pink-600">
+                Pheromone evaporation rate
+                <span class="inline-flex flex-row items-center gap-2">
+                    <input class="w-full" id="evaporation-range" type="range" min="0" max="1" step="0.05"/>
+                    <input id="evaporation-input" type="number" min="0" max="1" step="0.05"/>
+                </span>
+            </label>
+
+            <label class="flex flex-col justify-start text-sm text-neutral-300 accent-pink-600">
+                Pheromone deposit rate
+                <span class="inline-flex flex-row items-center gap-2">
+                    <input class="w-full" id="deposit-range" type="range" min="10" max="1000" step="1"/>
+                    <input id="deposit-input" type="number" min="10" max="1000" step="1"/>
+                </span>
+            </label>
+        </div>
+
+        <div class="flex flex-col p-2 gap-2 backdrop-blur-sm rounded-lg shadow-lg bg-white/15 mx-auto">
+            <div id="graph-container" class="p-[10px] rounded-sm border-2 border-neutral-200/20">
+                <canvas id="graph-canvas" width="625" height="625"></canvas>
+            </div>
+        </div>
+
+        <div class="flex flex-col p-2 gap-2 backdrop-blur-sm rounded-lg shadow-lg bg-white/15">
+            <label class="flex flex-col justify-start">
+                <span class="text-sm text-neutral-300">Dataset</span>
+                <select id="dataset-select" class="scheme-dark"></select>
+            </label>
+            <label class="flex flex-row items-center gap-2 accent-pink-600 w-fit">
+                Show labels
+                <input id="labels-checkbox" type="checkbox" checked="true"/>
+            </label>
+
+            <div class="mt-auto">
+                <button id="run-button" type="button" class="rounded-full font-bold p-2 my-4 bg-linear-30 from-indigo-600/40 to-pink-600/85 hover:shadow-md shadow-pink-600 w-full">
+                    Run
+                </button>
+
+                <div id="distance-chart-container" class="p-[10px] mx-auto w-[440px] box-content rounded-sm border-2 border-neutral-200/20 my-2">
+                    <canvas id="distance-chart-canvas" width="440" height="180"></canvas>
+                </div>
+
+                <div class="flex flex-col justify-start p-2 rounded-md bg-white/15">
+                    <span class="text-sm text-neutral-300">Best distance</span>
+                    <p id="distance-label" class="font-bold">&nbsp;</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="target/index.js" type="module"></script>
+</body>
+</html>
