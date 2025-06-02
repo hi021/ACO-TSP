@@ -89,7 +89,6 @@ export class Canvas {
 
         const originNodeId = route[0].source.id;
         const originNode = this.#nodes.get(originNodeId);
-        console.log(originNodeId, this.#nodes)
         originNode.color = this.#colors.highlightedNode;
         this.#nodes.set(originNodeId, originNode);
 

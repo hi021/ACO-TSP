@@ -57,7 +57,6 @@ export class Ant {
         const unvisitedNodeCount = nodes.size - this.route.size;
         if(unvisitedNodeCount <= 0) return null;
 
-        // TODO: global probability matrix?
         const probabilityMatrix = this.calculateProbabilityMatrix(sourceId, nodes, pheromoneMatrix, inverseDistanceMatrix, parameters);
 
         let currentProbability = 0;
@@ -99,14 +98,11 @@ export class Ant {
 
             const probability = (desirability ** parameters.distancePriority * pheromoneIntensity ** parameters.pheromoneImportance);
 
-            // console.log(i, desirability, pheromoneIntensity, probability) //
-
             probabilityMatrix[i] = probability;
             probabilitySum += probability;
         }
 
         for(let i = 0; i < probabilityMatrix.length; ++i)
-            // TODO FIXME I assume 0 / 0 causes NaN here
             probabilityMatrix[i] /= probabilitySum;
 
         return probabilityMatrix;
