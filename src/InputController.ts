@@ -27,10 +27,11 @@ export class InputController {
         depositRate: document.getElementById("deposit-input") as HTMLInputElement
     }
 
-    public distanceLabel = document.getElementById("distance-label") as HTMLParagraphElement;
-    public labelsCheckbox = document.getElementById("labels-checkbox") as HTMLInputElement;
-    public datasetSelect = document.getElementById("dataset-select") as HTMLSelectElement;
-    public runButton = document.getElementById("run-button") as HTMLButtonElement;
+    public readonly distanceLabel = document.getElementById("distance-label") as HTMLParagraphElement;
+    public readonly executionTimeLabel = document.getElementById("execution-time-label") as HTMLParagraphElement;
+    public readonly labelsCheckbox = document.getElementById("labels-checkbox") as HTMLInputElement;
+    public readonly datasetSelect = document.getElementById("dataset-select") as HTMLSelectElement;
+    public readonly runButton = document.getElementById("run-button") as HTMLButtonElement;
 
     constructor() {
         this.#rangeInputs.antCount.oninput = this.#numericInputs.antCount.oninput = this.updateAntCount.bind(this);
@@ -104,5 +105,9 @@ export class InputController {
 
     public updateDistanceLabel(distance?: number) {
         this.distanceLabel.innerHTML = distance ? Utils.formatNumber(Math.round(distance)) : "&nbsp;";
+    }
+    
+    public updateExecutionTimeLabel(ms?: number) {
+        this.executionTimeLabel.innerHTML = ms ? `${Math.round(ms) / 1000} s` : "&nbsp;";
     }
 }
