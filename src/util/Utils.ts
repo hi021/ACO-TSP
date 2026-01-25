@@ -1,4 +1,6 @@
 export class Utils {
+    public static readonly TSP_WORKER_PATH = "target/TspWorker.js";
+
     public static randomFromArray<T>(array: Array<T>) {
         return array[Math.floor(Math.random() * array.length)]
     }
