@@ -1,0 +1,8 @@
+{
+	"useTabs": true,
+	"singleQuote": true,
+	"trailingComma": "none",
+	"bracketSameLine": true,
+	"experimentalTernaries": true,
+	"printWidth": 120
+}
