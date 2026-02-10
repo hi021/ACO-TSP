@@ -47,6 +47,7 @@ function selectAndDrawDataset() {
 			new AttPseudoEuclideanDistanceCalculator()
 		:	new EuclideanDistanceCalculator();
 
+	inputController.updateOptimalDistanceLabel(datasets[selectedDataset].OPTIMAL_DISTANCE);
 	inputController.updateDistanceLabel();
 	inputController.updateExecutionTimeLabel();
 	canvas.unhighlightOriginNode(false);

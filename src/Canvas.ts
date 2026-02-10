@@ -50,7 +50,6 @@ export class Canvas {
 	public erase() {
 		this.#graph.clearRect(0, 0, this.#size, this.#size);
 	}
-
 	public clear() {
 		this.edges = [];
 		this.#nodes = new Map();
@@ -60,7 +59,6 @@ export class Canvas {
 	public drawEdges() {
 		for (const edge of this.edges) this.drawEdge(edge);
 	}
-
 	public drawNodes() {
 		for (const node of this.#nodes.values()) this.drawNode(node, this.#showLabels);
 	}
@@ -69,13 +67,11 @@ export class Canvas {
 		this.erase();
 		this.draw();
 	}
-
 	public redrawNodes(nodes: GraphNode[]) {
 		this.clear();
 		this.nodes = nodes;
 		this.drawNodes();
 	}
-
 	public draw() {
 		this.drawEdges();
 		this.drawNodes();
@@ -116,7 +112,7 @@ export class Canvas {
 			this.#graph.shadowColor = 'rgba(0,0,0,0)';
 		}
 
-		this.#graph.strokeStyle = this.#colors.edge;
+		this.#graph.strokeStyle = edge.color ?? this.#colors.edge;
 		this.#graph.lineWidth = this.edgeThickness;
 		this.#graph.beginPath();
 		this.#graph.moveTo(sourcePosition.x, sourcePosition.y);

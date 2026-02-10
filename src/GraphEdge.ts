@@ -11,6 +11,7 @@ type EdgeAsObject = {
 	source: NodeAsObject;
 	target: NodeAsObject;
 	pheromoneIntensity?: number;
+	color?: string;
 };
 
 export class GraphEdge {
@@ -18,6 +19,7 @@ export class GraphEdge {
 	source: GraphNode;
 	target: GraphNode;
 	pheromoneIntensity = 0;
+	color?: string;
 
 	constructor(id: string, source: GraphNode, target: GraphNode) {
 		this.id = id;

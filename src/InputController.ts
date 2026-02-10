@@ -27,7 +27,9 @@ export class InputController {
 		depositRate: document.getElementById('deposit-input') as HTMLInputElement
 	};
 
-	public readonly distanceLabel = document.getElementById('distance-label') as HTMLParagraphElement;
+	public readonly distanceParagraph = document.getElementById('distance-label') as HTMLParagraphElement;
+	public readonly distanceLabel = this.distanceParagraph.getElementsByTagName('span')[0] as HTMLSpanElement;
+	public readonly optimalDistanceLabel = this.distanceParagraph.getElementsByTagName('small')[0] as HTMLSpanElement;
 	public readonly executionTimeLabel = document.getElementById('execution-time-label') as HTMLParagraphElement;
 	public readonly labelsCheckbox = document.getElementById('labels-checkbox') as HTMLInputElement;
 	public readonly datasetSelect = document.getElementById('dataset-select') as HTMLSelectElement;
@@ -109,7 +111,10 @@ export class InputController {
 	}
 
 	public updateDistanceLabel(distance?: number) {
-		this.distanceLabel.innerHTML = distance ? Utils.formatNumber(Math.round(distance)) : '&nbsp;';
+		this.distanceLabel.innerHTML = distance ? Utils.formatNumber(Math.round(distance)) : '-';
+	}
+	public updateOptimalDistanceLabel(distance?: number) {
+		this.optimalDistanceLabel.innerHTML = distance ? '/' + Utils.formatNumber(Math.round(distance)) : '&nbsp;';
 	}
 
 	public updateExecutionTimeLabel(ms?: number) {
