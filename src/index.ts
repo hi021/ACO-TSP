@@ -1,4 +1,3 @@
-import { Aco } from './aco/Aco.js';
 import { Canvas } from './Canvas.js';
 import { ChartController } from './ChartController.js';
 import { NodeParser } from './conversion/NodeParser.js';
@@ -8,6 +7,9 @@ import { EuclideanDistanceCalculator } from './distance/EuclideanDistanceCalcula
 import { GraphEdge } from './GraphEdge.js';
 import { GraphNode } from './GraphNode.js';
 import { InputController } from './InputController.js';
+import { AbstractTsp } from './tsp/AbstractTsp.js';
+import { Aco } from './tsp/aco/Aco.js';
+import { BruteForceTsp } from './tsp/BruteForceTsp.js';
 import { Utils } from './util/Utils.js';
 
 //////////////////////////////////////////////////////////////////////////////
@@ -24,7 +26,7 @@ const parser = new NodeParser(dataSourcePaths, canvas.element.width, canvas.padd
 const datasets = await parser.parse();
 
 inputController.labelsCheckbox.onchange = onLabelCheckboxChange;
-inputController.runButton.onclick = runAco;
+inputController.runButton.onclick = runTsp;
 
 inputController.datasetSelect.onchange = onDatasetChange;
 for (const i in datasets)
@@ -64,11 +66,12 @@ function onLabelCheckboxChange(_: InputEvent) {
 	canvas.displayLabels = this.checked;
 }
 
-function runAco() {
+function runTsp() {
 	inputController.runButton.disabled = true;
 	const perfStart = performance.now();
 	const parameters = inputController.parameters;
 	const acoParameters = {
+		tsp: BruteForceTsp.name,
 		antCount: parameters.antCount,
 		distancePriority: parameters.distancePriority,
 		depositRate: parameters.depositRate,
@@ -79,7 +82,7 @@ function runAco() {
 		distanceCalculator: distanceCalculator.constructor.name
 	};
 
-	tspWorker.onmessage = (msg: MessageEvent<{ tsp: Aco; result: GraphEdge[] }>) => {
+	tspWorker.onmessage = (msg: MessageEvent<{ tsp: AbstractTsp; result: GraphEdge[] }>) => {
 		const perfTspEnd = performance.now();
 		const tsp = msg.data.tsp; // not an instance, just plain object!
 		canvas.edges = GraphEdge.buildEdgeArray(msg.data.result);
@@ -88,8 +91,11 @@ function runAco() {
 
 		inputController.updateDistanceLabel(tsp.bestRoute.distance);
 		inputController.updateExecutionTimeLabel(perfTspEnd - perfStart);
-		distanceHistoryChartController.values = tsp.distanceHistory;
-		distanceHistoryChartController.redraw();
+
+		if ((tsp as Aco).distanceHistory) {
+			distanceHistoryChartController.values = (tsp as Aco).distanceHistory;
+			distanceHistoryChartController.redraw();
+		}
 
 		inputController.runButton.disabled = false;
 	};

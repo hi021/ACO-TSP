@@ -1,7 +1,8 @@
-import { AbstractDistanceCalculator } from '../distance/AbstractDistanceCalculator.js';
+import { AbstractDistanceCalculator } from '../../distance/AbstractDistanceCalculator';
+import { GraphEdge } from '../../GraphEdge.js';
+import { GraphNode } from '../../GraphNode.js';
+import { BasicTspParameters } from '../AbstractTsp';
 import { AbstractAco, BasicAcoParameters } from './AbstractAco';
-import { GraphEdge } from '../GraphEdge.js';
-import { GraphNode } from '../GraphNode.js';
 import { Ant } from './Ant.js';
 
 export class Aco implements AbstractAco {
@@ -16,17 +17,16 @@ export class Aco implements AbstractAco {
 	currentRoute: { route: GraphEdge[]; distance: number };
 	bestRoute: { route: GraphEdge[]; distance: number };
 	currentIteration: number;
-	distanceCalculator: AbstractDistanceCalculator;
 	distanceHistory: number[];
+	distanceCalculator: AbstractDistanceCalculator;
 
 	constructor(
-		parameters: BasicAcoParameters & {
-			depositRate: number;
-			maxIterations: number;
-			antCount: number;
-			nodes: Map<string, GraphNode>;
-			distanceCalculator: AbstractDistanceCalculator;
-		}
+		parameters: BasicTspParameters &
+			BasicAcoParameters & {
+				depositRate: number;
+				maxIterations: number;
+				antCount: number;
+			}
 	) {
 		this.parameters = {
 			depositRate: parameters.depositRate,
@@ -64,15 +64,16 @@ export class Aco implements AbstractAco {
 		for (let i = 0; i < this.ants.length; ++i) this.ants[i] = new Ant([...this.nodes.values()]);
 
 		for (let i = 0; i < this.nodes.size; ++i) {
-			for (const ant of this.ants)
-				ant.pickAndVisitNode(this.nodes, this.pheromoneMatrix, this.inverseDistanceMatrix, this.parameters);
-			for (const ant of this.ants)
-				ant.depositPheromones(this.pheromoneMatrix, this.inverseDistanceMatrix, this.parameters.depositRate);
+			for (let a = 0; a < this.ants.length; ++a)
+				this.ants[a].pickAndVisitNode(this.nodes, this.pheromoneMatrix, this.inverseDistanceMatrix, this.parameters);
+			for (let a = 0; a < this.ants.length; ++a)
+				this.ants[a].depositPheromones(this.pheromoneMatrix, this.inverseDistanceMatrix, this.parameters.depositRate);
 		}
 		this.evaporatePheromones();
 
 		// pick best iteration route
-		for (const ant of this.ants) {
+		for (let a = 0; a < this.ants.length; ++a) {
+			const ant = this.ants[a];
 			const antDistance = ant.getClosedDistance(this.distanceCalculator);
 			if (!this.currentRoute.route.length || this.currentRoute.distance > antDistance)
 				this.currentRoute = {
@@ -82,7 +83,6 @@ export class Aco implements AbstractAco {
 		}
 
 		if (this.currentRoute.distance < this.bestRoute.distance) this.bestRoute = this.currentRoute;
-
 		this.distanceHistory[this.currentIteration] = this.bestRoute.distance;
 
 		++this.currentIteration;
@@ -97,7 +97,6 @@ export class Aco implements AbstractAco {
 
 	private allocatePheromoneMatrix() {
 		this.pheromoneMatrix = new Array<number[]>(this.nodes.size);
-
 		for (let i = 0; i < this.pheromoneMatrix.length; ++i)
 			this.pheromoneMatrix[i] = new Array<number>(this.nodes.size).fill(1);
 
@@ -106,7 +105,6 @@ export class Aco implements AbstractAco {
 
 	private allocateAndCalculateInverseDistanceMatrix() {
 		this.inverseDistanceMatrix = new Array<number[]>(this.nodes.size);
-
 		for (let i = 0; i < this.inverseDistanceMatrix.length; ++i) {
 			this.inverseDistanceMatrix[i] = new Array<number>(this.nodes.size);
 			for (let j = 0; j < this.inverseDistanceMatrix[i].length; ++j) {
