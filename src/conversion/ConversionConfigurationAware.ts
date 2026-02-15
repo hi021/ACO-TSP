@@ -1,12 +1,12 @@
 export abstract class ConversionConfigurationAware {
-	delimiter = ' ';
+	delimiter: string | RegExp = /\s+/;
 	nodeSectionHeader = 'NODE_COORD_SECTION';
 	eofSymbol = 'EOF';
 	dataField = 'DATA';
 	scale = 0.075;
 
 	constructor(
-		delimiter = ' ',
+		delimiter: string | RegExp = /\s+/,
 		nodeSectionHeader = 'NODE_COORD_SECTION',
 		eofSymbol = 'EOF',
 		dataField = 'DATA',

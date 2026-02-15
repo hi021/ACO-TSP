@@ -7,7 +7,7 @@ export class DatasetConverterTsp extends ConversionConfigurationAware implements
 
 	constructor(
 		maxCoordinate: number,
-		delimiter?: string,
+		delimiter?: string | RegExp,
 		nodeSectionHeader?: string,
 		eofSymbol?: string,
 		dataField?: string,
@@ -30,7 +30,7 @@ export class DatasetConverterTsp extends ConversionConfigurationAware implements
 				return json;
 			}
 
-			json[key] = columns.join(this.delimiter).trim();
+			json[key] = columns.join(' ').trim();
 		}
 
 		throw new Error(`No node data for dataset "${json.NAME}"`);

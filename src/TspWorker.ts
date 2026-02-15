@@ -3,6 +3,8 @@ import { GraphNode } from '/target/GraphNode.js';
 //@ts-expect-error - necessary for import resolving inside target file
 import { EuclideanDistanceCalculator } from '/target/distance/EuclideanDistanceCalculator.js';
 //@ts-expect-error - necessary for import resolving inside target file
+import { GeographicalDistanceCalculator } from '/target/distance/GeographicalDistanceCalculator.js';
+//@ts-expect-error - necessary for import resolving inside target file
 import { AttPseudoEuclideanDistanceCalculator } from '/target/distance/AttPseudoEuclideanDistanceCalculator.js';
 //@ts-expect-error - necessary for import resolving inside target file
 import { AbstractTsp } from '/target/tsp/AbstractTsp.js';
@@ -11,19 +13,22 @@ import { BruteForceTsp } from '/target/tsp/BruteForceTsp.js';
 //@ts-expect-error - necessary for import resolving inside target file
 import { Aco } from '/target/tsp/aco/Aco.js';
 
+import '/go-src/wasm_exec.js';
+
 const classMap = {
 	GraphNode,
 	EuclideanDistanceCalculator,
+	GeographicalDistanceCalculator,
 	AttPseudoEuclideanDistanceCalculator,
 	AbstractTsp,
 	BruteForceTsp,
 	Aco
 };
 
-self.onmessage = (msg: MessageEvent<Record<string, any>>) => {
+self.onmessage = async (msg: MessageEvent<Record<string, any>>) => {
 	const params = parseParams(msg.data);
 	const tsp = instantiateTsp(params);
-	const result = tsp.run();
+	const result = await tsp.run();
 
 	self.postMessage({ tsp, result });
 };

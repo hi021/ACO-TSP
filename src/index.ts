@@ -2,8 +2,7 @@ import { Canvas } from './Canvas.js';
 import { ChartController } from './ChartController.js';
 import { NodeParser } from './conversion/NodeParser.js';
 import { AbstractDistanceCalculator } from './distance/AbstractDistanceCalculator.js';
-import { AttPseudoEuclideanDistanceCalculator } from './distance/AttPseudoEuclideanDistanceCalculator.js';
-import { EuclideanDistanceCalculator } from './distance/EuclideanDistanceCalculator.js';
+import { EdgeTypeBasedDistanceCalculatorSelectionStrategy } from './distance/EdgeTypeBasedDistanceCalculatorSelectionStrategy.js';
 import { GraphEdge } from './GraphEdge.js';
 import { GraphNode } from './GraphNode.js';
 import { InputController } from './InputController.js';
@@ -14,7 +13,13 @@ import { Utils } from './util/Utils.js';
 
 //////////////////////////////////////////////////////////////////////////////
 
-const dataSourcePaths = ['../data/att48.tsp', '../data/berlin52.tsp', '../data/dantzig42.tsp', '../data/att532.tsp'];
+const dataSourcePaths = [
+	'../data/att48.tsp',
+	'../data/berlin52.tsp',
+	'../data/dantzig42.tsp',
+	'../data/att532.tsp',
+	'../data/burma14.tsp'
+];
 
 const inputController = new InputController();
 const canvas = new Canvas(document.getElementById('graph-canvas') as HTMLCanvasElement);
@@ -44,10 +49,9 @@ selectAndDrawDataset();
 
 function selectAndDrawDataset() {
 	nodes = datasets[selectedDataset].DATA;
-	distanceCalculator =
-		datasets[selectedDataset].EDGE_WEIGHT_TYPE == 'ATT' ?
-			new AttPseudoEuclideanDistanceCalculator()
-		:	new EuclideanDistanceCalculator();
+	distanceCalculator = new (EdgeTypeBasedDistanceCalculatorSelectionStrategy.getDistanceCalculator(
+		datasets[selectedDataset].EDGE_WEIGHT_TYPE
+	))();
 
 	inputController.updateOptimalDistanceLabel(datasets[selectedDataset].OPTIMAL_DISTANCE);
 	inputController.updateDistanceLabel();
