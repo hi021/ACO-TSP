@@ -26,5 +26,5 @@ export abstract class AbstractTsp {
 	}
 
 	public abstract reset(): void;
-	public abstract run(): GraphEdge[];
+	public abstract run(): Promise<GraphEdge[]>;
 }

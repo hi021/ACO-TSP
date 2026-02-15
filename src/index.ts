@@ -96,6 +96,7 @@ function runTsp() {
 		inputController.updateDistanceLabel(tsp.bestRoute.distance);
 		inputController.updateExecutionTimeLabel(perfTspEnd - perfStart);
 
+		// TODO typeguard
 		if ((tsp as Aco).distanceHistory) {
 			distanceHistoryChartController.values = (tsp as Aco).distanceHistory;
 			distanceHistoryChartController.redraw();

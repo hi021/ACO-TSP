@@ -8,20 +8,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"strconv"
 	"syscall/js"
 	"time"
 )
 
 type GraphNode struct {
-	ID string  `json:"id"`
-	X  float64 `json:"position.native.x"`
-	Y  float64 `json:"position.native.y"`
+	Index int
+	ID    string  `json:"id"`
+	X     float64 `json:"x"`
+	Y     float64 `json:"y"`
+	Lat   float64
+	Lon   float64
 }
 
 type GraphEdge struct {
-	ID     string    `json:"id"`
-	Source GraphNode `json:"source"`
-	Target GraphNode `json:"target"`
+	ID     string     `json:"id"`
+	Source *GraphNode `json:"source"`
+	Target *GraphNode `json:"target"`
 }
 
 type Result struct {
@@ -30,12 +34,31 @@ type Result struct {
 }
 
 var bestDistance int
-var bestRoute []GraphNode
+var bestRoute []int
 
+func (n *GraphNode) precomputeCoordinates() {
+	n.Lat = calculateCoordinate(n.X)
+	n.Lon = calculateCoordinate(n.Y)
+}
+
+// //////////////////////////////////// GEO DISTANCE CALC
 const (
 	PI           = 3.141592
 	EARTH_RADIUS = 6378.388
 )
+
+var distCache [][]int
+
+func initDistanceCache(nodes []GraphNode) {
+	nodeCount := len(nodes)
+	distCache = make([][]int, nodeCount)
+	for i := range distCache {
+		distCache[i] = make([]int, nodeCount)
+		for j := range distCache[i] {
+			distCache[i][j] = geoDistance(&nodes[i], &nodes[j])
+		}
+	}
+}
 
 func calculateCoordinate(coord float64) float64 {
 	deg := math.Floor(coord)
@@ -43,37 +66,41 @@ func calculateCoordinate(coord float64) float64 {
 	return PI * (deg + (5.0*min)/3.0) / 180.0
 }
 
-func geoDistance(a, b GraphNode) int {
-	latA, lonA := calculateCoordinate(a.X), calculateCoordinate(a.Y)
-	latB, lonB := calculateCoordinate(b.X), calculateCoordinate(b.Y)
-	q1 := math.Cos(lonA - lonB)
-	q2 := math.Cos(latA - latB)
-	q3 := math.Cos(latA + latB)
-	d := EARTH_RADIUS * math.Acos(0.5*((1+q1)*q2-(1-q1)*q3))
-	return int(d + 1.0)
+func geoDistance(source, target *GraphNode) int {
+	if source == target {
+		return 1.0
+	}
+
+	dLat := target.Lat - source.Lat
+	dLon := target.Lon - source.Lon
+
+	sinLat := math.Sin(dLat * 0.5)
+	sinLon := math.Sin(dLon * 0.5)
+
+	h := sinLat*sinLat + math.Cos(source.Lat)*math.Cos(target.Lat)*sinLon*sinLon
+	d := 2 * EARTH_RADIUS * math.Asin(math.Sqrt(h))
+
+	dist := int(d + 1.0)
+	return dist
 }
 
-func evaluateRoute(start GraphNode, perm []GraphNode) {
+func evaluateRoute(start int, nodeIndexes []int) {
 	total := 0
 	prev := start
 
-	for i := range len(perm) {
-		next := perm[i]
-		total += geoDistance(prev, next)
+	for _, next := range nodeIndexes {
+		total += distCache[prev][next]
 		if total >= bestDistance {
 			return
 		}
 		prev = next
 	}
 
-	total += geoDistance(prev, start)
-	if total >= bestDistance {
-		return
+	total += distCache[prev][start]
+	if total < bestDistance {
+		bestDistance = total
+		copy(bestRoute, nodeIndexes)
 	}
-
-	bestDistance = total
-	bestRoute = make([]GraphNode, len(perm))
-	copy(bestRoute, perm)
 }
 
 func runBruteForce(nodes []GraphNode) Result {
@@ -81,21 +108,28 @@ func runBruteForce(nodes []GraphNode) Result {
 		return Result{Route: []GraphEdge{}, Distance: 0}
 	}
 
-	start := nodes[0]
-	perm := append([]GraphNode{}, nodes[1:]...)
+	nodeIndexes := make([]int, len(nodes))
+	for i := range nodes {
+		nodes[i].Index = i
+		nodeIndexes[i] = i
+		nodes[i].precomputeCoordinates()
+	}
+	initDistanceCache(nodes)
+
+	start := nodeIndexes[0]
+	perm := append([]int{}, nodeIndexes[1:]...)
 
 	bestDistance = math.MaxInt
-	bestRoute = nil
+	bestRoute = make([]int, len(perm))
 
+	tPrev := time.Now()
+	var tCur time.Time
+	permCount := 1
+	prevPermCount := 0
 	evaluateRoute(start, perm)
 
 	c := make([]int, len(perm))
 	i := 0
-
-	tPrev := time.Now()
-	var tCur time.Time
-	permCount := 0
-	prevPermCount := 0
 
 	for i < len(perm) {
 		if c[i] >= i {
@@ -116,10 +150,12 @@ func runBruteForce(nodes []GraphNode) Result {
 		permCount++
 		tCur = time.Now()
 		tSince := tCur.Sub(tPrev).Seconds()
-		if tSince >= 1 {
+		if tSince >= 10 {
 			permPerDelta := permCount - prevPermCount
 			permPerSecond := float64(permPerDelta) / tSince
-			js.Global().Get("console").Call("log", fmt.Sprintf("%d total, %.2f/s", permCount, permPerSecond))
+			go func() {
+				js.Global().Get("console").Call("log", fmt.Sprintf("%d total, %.2f/s", permCount, permPerSecond))
+			}()
 
 			prevPermCount = permCount
 			tPrev = tCur
@@ -132,16 +168,16 @@ func runBruteForce(nodes []GraphNode) Result {
 	prev := start
 	for i, n := range bestRoute {
 		edges = append(edges, GraphEdge{
-			ID:     string(rune(i)),
-			Source: prev,
-			Target: n,
+			ID:     strconv.Itoa(i),
+			Source: &nodes[prev],
+			Target: &nodes[n],
 		})
 		prev = n
 	}
 	edges = append(edges, GraphEdge{
-		ID:     string(rune(len(bestRoute))),
-		Source: prev,
-		Target: start,
+		ID:     strconv.Itoa(len(bestRoute)),
+		Source: &nodes[prev],
+		Target: &nodes[start],
 	})
 
 	return Result{
@@ -150,11 +186,12 @@ func runBruteForce(nodes []GraphNode) Result {
 	}
 }
 
-// WASM EXPORT
+// ////////////////////////////////// WASM EXPORT
 func wasmRun() js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) any {
 		var nodes []GraphNode
 		if err := json.Unmarshal([]byte(args[0].String()), &nodes); err != nil {
+			js.Global().Get("console").Call("error", err.Error())
 			return js.ValueOf("invalid JSON: " + err.Error())
 		}
 

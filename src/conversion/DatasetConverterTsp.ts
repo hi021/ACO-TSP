@@ -45,6 +45,9 @@ export class DatasetConverterTsp extends ConversionConfigurationAware implements
 			data.push(new GraphNode(columns[0], +columns[1], +columns[2]));
 		}
 
+		const minCoordinates = this.findMinCoordinates(data);
+		for (const node of data) node.setPosition(node.x - minCoordinates.x + 1, node.y - minCoordinates.y + 1);
+
 		const maxCoordinate = this.findMaxCoordinate(data);
 		this.scale = this.maxCoordinate / maxCoordinate;
 		return this.scaleNodes(data);
@@ -58,6 +61,24 @@ export class DatasetConverterTsp extends ConversionConfigurationAware implements
 		}
 
 		return max;
+	}
+
+	private findMinCoordinates(nodes: GraphNode[]) {
+		let x = 0,
+			y = 0;
+		for (let i = 0; i < nodes.length; ++i) {
+			const node = nodes[i];
+			if (!i) {
+				x = node.x;
+				y = node.y;
+				continue;
+			}
+
+			x = node.x < x ? node.x : x;
+			y = node.y < y ? node.y : y;
+		}
+
+		return { x, y };
 	}
 
 	private scaleNodes(nodes: GraphNode[], scale = this.scale) {

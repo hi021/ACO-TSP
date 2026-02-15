@@ -54,7 +54,7 @@ export class Aco implements AbstractAco {
 	public run() {
 		let iterationResult: GraphEdge[], result: GraphEdge[];
 		while ((iterationResult = this.nextIteration())) result = iterationResult;
-		return result;
+		return new Promise((resolve) => resolve(result)) as Promise<GraphEdge[]>;
 	}
 
 	private nextIteration() {
