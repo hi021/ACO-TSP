@@ -1,6 +1,7 @@
 import { AbstractDistanceCalculator } from '../../../distance/AbstractDistanceCalculator.js';
 import { GraphEdge } from '../../../GraphEdge.js';
 import { GraphNode } from '../../../GraphNode.js';
+import { TspAlgorithmDatasetId } from '../../TspAlgorithmDatasetEnum.js';
 import { BasicTspParameters } from '../AbstractTsp';
 import { AbstractAco, BasicAcoParameters } from './AbstractAco';
 import { Ant } from './Ant.js';
@@ -77,7 +78,7 @@ export class Aco implements AbstractAco {
 			const antDistance = ant.getClosedDistance(this.distanceCalculator);
 			if (!this.currentRoute.route.length || this.currentRoute.distance > antDistance)
 				this.currentRoute = {
-					route: GraphEdge.buildGraph(ant.closedRoute),
+					route: GraphEdge.buildGraph(ant.closedRoute, TspAlgorithmDatasetId.ACO),
 					distance: antDistance
 				};
 		}

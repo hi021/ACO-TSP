@@ -11,11 +11,9 @@ export class ChartController {
 	#values: number[];
 	#points: Point[];
 	#colors = {
-		node: '#be185d',
-		highlightedNode: '#fb7185',
-		label: '#e5e5e5',
-		edge: '#0d9488',
-		shadow: 'rgba(0,0,0,0.25)'
+		node: 'oklch(45.2% 0.211 324.591)',
+		edge: 'oklch(52.5% 0.223 3.958 /0.6)',
+		shadow: 'rgba(0,0,0,0.3)'
 	};
 
 	constructor(element: HTMLCanvasElement) {

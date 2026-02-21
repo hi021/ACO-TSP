@@ -1,8 +1,8 @@
-import { Canvas } from './Canvas.js';
 import { ChartController } from './ChartController.js';
 import { NodeParser } from './conversion/NodeParser.js';
 import { AbstractDistanceCalculator } from './distance/AbstractDistanceCalculator.js';
 import { EdgeTypeBasedDistanceCalculatorSelectionStrategy } from './distance/EdgeTypeBasedDistanceCalculatorSelectionStrategy.js';
+import { GraphCanvas } from './GraphCanvas.js';
 import { GraphNode } from './GraphNode.js';
 import { InputController } from './InputController.js';
 import { Aco } from './tsp/impl/aco/Aco.js';
@@ -19,7 +19,7 @@ const dataSourcePaths = [
 ];
 
 const inputController = new InputController();
-const canvas = new Canvas(document.getElementById('graph-canvas') as HTMLCanvasElement);
+const canvas = new GraphCanvas(document.getElementById('graph-canvas') as HTMLCanvasElement);
 const distanceHistoryChartController = new ChartController(
 	document.getElementById('distance-chart-canvas') as HTMLCanvasElement
 );

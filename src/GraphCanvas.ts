@@ -1,24 +1,30 @@
 import { GraphEdge } from './GraphEdge.js';
 import { GraphNode } from './GraphNode.js';
+import { TspAlgorithmEnum } from './tsp/TspAlgorithmEnum.js';
 import { Point } from './util/Point.js';
 
-export class Canvas {
+export class GraphCanvas {
 	#element: HTMLCanvasElement;
 	#graph: CanvasRenderingContext2D;
 	#nodes: Map<string, GraphNode> = new Map();
-	edges: GraphEdge[] = [];
+	datasets = new Array<GraphEdge[]>(Object.keys(TspAlgorithmEnum).length);
 
 	#showLabels = true;
 	#size = 750;
 	padding = 10;
 	nodeRadius = 5;
-	edgeThickness = 2;
+	edgeThickness = 3;
 	#colors = {
-		node: '#be185d',
-		highlightedNode: '#fb7185',
+		node: ['oklch(45.2% 0.211 324.591)'],
+		highlightedNode: ['oklch(45.2% 0.211 324.591)'],
 		label: '#e5e5e5',
-		edge: '#0d9488',
-		shadow: 'rgba(0,0,0,0.25)'
+		edge: [
+			'oklch(52.5% 0.223 3.958 /0.6)',
+			'oklch(58.8% 0.158 241.966 /0.6)',
+			'oklch(54.1% 0.281 293.009 /0.6)',
+			'oklch(59.6% 0.145 163.225 /0.6)'
+		],
+		shadow: 'rgba(0,0,0,0.3)'
 	};
 
 	constructor(element: HTMLCanvasElement) {
@@ -39,8 +45,22 @@ export class Canvas {
 		this.redraw();
 	}
 
+	get datasetCount() {
+		return this.datasets.length;
+	}
+
 	get element() {
 		return this.#element;
+	}
+
+	public getNodeColor(datasetId = 0) {
+		return this.#colors.node[datasetId % this.#colors.node.length];
+	}
+	public getHighlightedNodeColor(datasetId = 0) {
+		return this.#colors.highlightedNode[datasetId % this.#colors.highlightedNode.length];
+	}
+	public getEdgeColor(datasetId = 0) {
+		return this.#colors.edge[datasetId % this.#colors.edge.length];
 	}
 
 	public getTransformedNodePosition(node: GraphNode) {
@@ -50,17 +70,32 @@ export class Canvas {
 	public erase() {
 		this.#graph.clearRect(0, 0, this.#size, this.#size);
 	}
+	public eraseAllDatasets() {
+		this.clearAllDatasets();
+		this.erase();
+		this.drawNodes();
+	}
+	public clearDataset(datasetId: number) {
+		this.datasets[datasetId] = [];
+	}
+	public clearAllDatasets() {
+		for (let i = 0; i < this.datasetCount; ++i) this.datasets[i] = [];
+	}
 	public clear() {
-		this.edges = [];
+		this.clearAllDatasets();
 		this.#nodes = new Map();
 		this.erase();
 	}
 
-	public drawEdges() {
-		for (const edge of this.edges) this.drawEdge(edge);
+	public drawDataset(datasetId: number) {
+		const dataset = this.datasets[datasetId];
+		for (let i = 0; i < dataset.length; ++i) this.drawEdge(dataset[i]);
 	}
-	public drawNodes() {
-		for (const node of this.#nodes.values()) this.drawNode(node, this.#showLabels);
+	public drawAllDatasets() {
+		for (let i = 0; i < this.datasetCount; ++i) this.drawDataset(i);
+	}
+	public drawNodes(datasetId = 0) {
+		for (const node of this.#nodes.values()) this.drawNode(node, this.#showLabels, true, datasetId);
 	}
 
 	public redraw() {
@@ -73,7 +108,7 @@ export class Canvas {
 		this.drawNodes();
 	}
 	public draw() {
-		this.drawEdges();
+		this.drawAllDatasets();
 		this.drawNodes();
 	}
 
@@ -82,7 +117,7 @@ export class Canvas {
 
 		const originNodeId = route[0].source.id;
 		const originNode = this.#nodes.get(originNodeId);
-		originNode.color = this.#colors.highlightedNode;
+		originNode.color = this.getHighlightedNodeColor(route[0].datasetId);
 		this.#nodes.set(originNodeId, originNode);
 
 		this.redraw();
@@ -112,7 +147,7 @@ export class Canvas {
 			this.#graph.shadowColor = 'rgba(0,0,0,0)';
 		}
 
-		this.#graph.strokeStyle = edge.color ?? this.#colors.edge;
+		this.#graph.strokeStyle = edge.color ?? this.getEdgeColor(edge.datasetId);
 		this.#graph.lineWidth = this.edgeThickness;
 		this.#graph.beginPath();
 		this.#graph.moveTo(sourcePosition.x, sourcePosition.y);
@@ -120,11 +155,11 @@ export class Canvas {
 		this.#graph.stroke();
 	}
 
-	private drawNode(node: GraphNode, withLabel: boolean, withShadow = true) {
+	private drawNode(node: GraphNode, withLabel: boolean, withShadow = true, datasetId = 0) {
 		if (!this.#graph) throw new Error('Attempted to render uninitialized graph.');
 
 		const position = this.getTransformedNodePosition(node);
-		this.#graph.fillStyle = node.color ?? this.#colors.node;
+		this.#graph.fillStyle = node.color ?? this.getNodeColor(datasetId);
 		this.#graph.beginPath();
 		this.#graph.arc(position.x, position.y, this.nodeRadius, 0, 2 * Math.PI, false);
 

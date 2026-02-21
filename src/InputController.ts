@@ -1,4 +1,5 @@
 import { TspAlgorithm } from './tsp/TspAlgorithmEnum.js';
+import { TspController } from './tsp/TspController.js';
 import { Utils } from './util/Utils.js';
 
 export class InputController {
@@ -28,13 +29,23 @@ export class InputController {
 		depositRate: document.getElementById('aco-deposit-input') as HTMLInputElement
 	};
 
-	public readonly distanceLabels = {
-		BRUTE_FORCE: document.getElementById('distance-label-bf').getElementsByTagName('span')[0] as HTMLSpanElement,
-		ACO: document.getElementById('distance-label-aco').getElementsByTagName('span')[0] as HTMLSpanElement
+	public readonly algorithmEnabledCheckboxes: { [tspAlgorithm in TspAlgorithm]: HTMLInputElement } = {
+		ACO: document.getElementById('aco-enabled') as HTMLInputElement,
+		BRUTE_FORCE: document.getElementById('bf-enabled') as HTMLInputElement,
+		NEAREST_NEIGHBOR: document.getElementById('nn-enabled') as HTMLInputElement,
+		SIMULATED_ANNEALING: document.getElementById('sa-enabled') as HTMLInputElement
 	};
-	public readonly executionTimeLabels = {
+	public readonly distanceLabels: { [tspAlgorithm in TspAlgorithm]: HTMLSpanElement } = {
+		ACO: document.getElementById('distance-label-aco').getElementsByTagName('span')[0] as HTMLSpanElement,
+		BRUTE_FORCE: document.getElementById('distance-label-bf').getElementsByTagName('span')[0] as HTMLSpanElement,
+		NEAREST_NEIGHBOR: document.getElementById('distance-label-nn').getElementsByTagName('span')[0] as HTMLSpanElement,
+		SIMULATED_ANNEALING: document.getElementById('distance-label-sa').getElementsByTagName('span')[0] as HTMLSpanElement
+	};
+	public readonly executionTimeLabels: { [tspAlgorithm in TspAlgorithm]: HTMLParagraphElement } = {
+		ACO: document.getElementById('execution-time-label-aco') as HTMLParagraphElement,
 		BRUTE_FORCE: document.getElementById('execution-time-label-bf') as HTMLParagraphElement,
-		ACO: document.getElementById('execution-time-label-aco') as HTMLParagraphElement
+		NEAREST_NEIGHBOR: document.getElementById('execution-time-label-nn') as HTMLParagraphElement,
+		SIMULATED_ANNEALING: document.getElementById('execution-time-label-sa') as HTMLParagraphElement
 	};
 	public readonly optimalDistanceLabels = document.getElementsByClassName('optimal-distance-label');
 
@@ -54,6 +65,10 @@ export class InputController {
 			this.updateEvaporationRate.bind(this);
 		this.#acoRangeInputs.depositRate.oninput = this.#acoNumericInputs.depositRate.oninput =
 			this.updateDepositRate.bind(this);
+
+		// TODO after adding missing algos
+		let i = 0;
+		for (const checkbox of Object.values(this.algorithmEnabledCheckboxes)) checkbox.checked = i++ <= 1;
 
 		this.setAntCount();
 		this.setIterationCount();
@@ -141,5 +156,9 @@ export class InputController {
 	public updateExecutionTimeLabels(ms?: number) {
 		const content = ms ? `${Math.round(ms) / 1000} s` : '&nbsp;';
 		for (const label of Object.values(this.executionTimeLabels)) label.innerHTML = content;
+	}
+
+	public isAlgorithmEnabled(tsp: TspAlgorithm) {
+		return this.algorithmEnabledCheckboxes[tsp].checked;
 	}
 }

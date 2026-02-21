@@ -1,22 +1,33 @@
 import { GraphEdge } from '../../GraphEdge.js';
 import { GraphNode } from '../../GraphNode.js';
+import { TspAlgorithmDatasetId } from '../TspAlgorithmDatasetEnum.js';
 import { AbstractTsp } from './AbstractTsp.js';
 
 declare const Go: new () => any;
 declare const runBruteForce: (nodeArgs: string) => string;
 
 export class BruteForceTsp extends AbstractTsp {
+	public static readonly MAX_EXECUTION_NODE_COUNT = 14;
+
 	public reset(): void {
 		this.bestRoute = this.currentRoute = { route: [], distance: Infinity };
 	}
 
 	public async run() {
+		// const nodes = [...this.nodes.values()];
+		const nodes = [...this.nodes.values()].slice(0, 8); //TODO: testing purposes
+		if (nodes.length > BruteForceTsp.MAX_EXECUTION_NODE_COUNT) {
+			console.warn(
+				`Skipping brute force algorithm execution for dataset over ${BruteForceTsp.MAX_EXECUTION_NODE_COUNT} nodes due to the inherent time complexity`
+			);
+			this.bestRoute = this.currentRoute = { route: [], distance: 0 };
+			return [];
+		}
+
 		const go = new Go();
 		const wasm = await WebAssembly.instantiateStreaming(fetch('/go-src/brute-force.wasm'), go.importObject);
 		go.run(wasm.instance);
 
-		// const nodes = [...this.nodes.values()];
-		const nodes = [...this.nodes.values()].slice(0, 8); //TODO: testing purposes
 		const dumbNodes = GraphNode.toWasm(nodes);
 		const resultJson = runBruteForce(JSON.stringify(dumbNodes));
 		const result = JSON.parse(resultJson) as { route: GraphEdge[]; distance: number }; // all edge nodes are dumb nodes
@@ -27,11 +38,11 @@ export class BruteForceTsp extends AbstractTsp {
 			const source = nodes.find((it) => it.id == resultNode.source.id);
 			const target = nodes.find((it) => it.id == resultNode.target.id);
 
-			const edge = new GraphEdge((i + 1).toString(), source, target);
+			const edge = new GraphEdge((i + 1).toString(), source, target, TspAlgorithmDatasetId.BRUTE_FORCE);
 			route[i] = edge;
 		}
 
-		this.bestRoute = { route, distance: result.distance };
+		this.bestRoute = this.currentRoute = { route, distance: result.distance };
 		return route;
 	}
 
