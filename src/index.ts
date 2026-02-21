@@ -3,21 +3,18 @@ import { ChartController } from './ChartController.js';
 import { NodeParser } from './conversion/NodeParser.js';
 import { AbstractDistanceCalculator } from './distance/AbstractDistanceCalculator.js';
 import { EdgeTypeBasedDistanceCalculatorSelectionStrategy } from './distance/EdgeTypeBasedDistanceCalculatorSelectionStrategy.js';
-import { GraphEdge } from './GraphEdge.js';
 import { GraphNode } from './GraphNode.js';
 import { InputController } from './InputController.js';
-import { AbstractTsp } from './tsp/AbstractTsp.js';
-import { Aco } from './tsp/aco/Aco.js';
-import { BruteForceTsp } from './tsp/BruteForceTsp.js';
-import { Utils } from './util/Utils.js';
+import { Aco } from './tsp/impl/aco/Aco.js';
+import { TspController, TspWorkerProcessedResult } from './tsp/TspController.js';
 
 //////////////////////////////////////////////////////////////////////////////
 
 const dataSourcePaths = [
 	'../data/att48.tsp',
+	'../data/att532.tsp',
 	'../data/berlin52.tsp',
 	'../data/dantzig42.tsp',
-	'../data/att532.tsp',
 	'../data/burma14.tsp'
 ];
 
@@ -26,12 +23,13 @@ const canvas = new Canvas(document.getElementById('graph-canvas') as HTMLCanvasE
 const distanceHistoryChartController = new ChartController(
 	document.getElementById('distance-chart-canvas') as HTMLCanvasElement
 );
-const tspWorker = new Worker(Utils.TSP_WORKER_PATH, { type: 'module' });
+
 const parser = new NodeParser(dataSourcePaths, canvas.element.width, canvas.padding);
 const datasets = await parser.parse();
+const tspController = new TspController(inputController, canvas);
 
 inputController.labelsCheckbox.onchange = onLabelCheckboxChange;
-inputController.runButton.onclick = runTsp;
+inputController.runButton.onclick = runTsps;
 
 inputController.datasetSelect.onchange = onDatasetChange;
 for (const i in datasets)
@@ -44,6 +42,7 @@ let selectedDataset = Object.values(datasets)[0].NAME;
 let nodes: GraphNode[];
 
 selectAndDrawDataset();
+instantiateTspWorkerCallbacks();
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -53,11 +52,18 @@ function selectAndDrawDataset() {
 		datasets[selectedDataset].EDGE_WEIGHT_TYPE
 	))();
 
-	inputController.updateOptimalDistanceLabel(datasets[selectedDataset].OPTIMAL_DISTANCE);
-	inputController.updateDistanceLabel();
-	inputController.updateExecutionTimeLabel();
+	inputController.updateOptimalDistanceLabels(datasets[selectedDataset].OPTIMAL_DISTANCE);
+	inputController.updateDistanceLabels();
+	inputController.updateExecutionTimeLabels();
 	canvas.unhighlightOriginNode(false);
 	canvas.redrawNodes(nodes);
+}
+
+function instantiateTspWorkerCallbacks() {
+	tspController.tspWorkers.get('ACO').callback = (result: TspWorkerProcessedResult) => {
+		distanceHistoryChartController.values = (result.tsp as Aco).distanceHistory;
+		distanceHistoryChartController.redraw();
+	};
 }
 
 function onDatasetChange(_: InputEvent) {
@@ -70,40 +76,18 @@ function onLabelCheckboxChange(_: InputEvent) {
 	canvas.displayLabels = this.checked;
 }
 
-function runTsp() {
-	inputController.runButton.disabled = true;
-	const perfStart = performance.now();
-	const parameters = inputController.parameters;
-	const acoParameters = {
-		tsp: BruteForceTsp.name,
-		antCount: parameters.antCount,
-		distancePriority: parameters.distancePriority,
-		depositRate: parameters.depositRate,
-		pheromoneImportance: parameters.pheromoneImportance,
-		evaporationRate: 1 - parameters.evaporationRate,
-		maxIterations: parameters.iterationCount,
+function runTsps() {
+	const acoParams = inputController.acoParameters;
+	const tspParams = {
+		antCount: acoParams.antCount,
+		distancePriority: acoParams.distancePriority,
+		depositRate: acoParams.depositRate,
+		pheromoneImportance: acoParams.pheromoneImportance,
+		evaporationRate: 1 - acoParams.evaporationRate,
+		maxIterations: acoParams.iterationCount,
 		nodes: GraphNode.toMap(nodes),
 		distanceCalculator: distanceCalculator.constructor.name
 	};
 
-	tspWorker.onmessage = (msg: MessageEvent<{ tsp: AbstractTsp; result: GraphEdge[] }>) => {
-		const perfTspEnd = performance.now();
-		const tsp = msg.data.tsp; // not an instance, just plain object!
-		canvas.edges = GraphEdge.buildEdgeArray(msg.data.result);
-
-		canvas.findAndHighlightOriginNode(tsp.bestRoute.route);
-
-		inputController.updateDistanceLabel(tsp.bestRoute.distance);
-		inputController.updateExecutionTimeLabel(perfTspEnd - perfStart);
-
-		// TODO typeguard
-		if ((tsp as Aco).distanceHistory) {
-			distanceHistoryChartController.values = (tsp as Aco).distanceHistory;
-			distanceHistoryChartController.redraw();
-		}
-
-		inputController.runButton.disabled = false;
-	};
-
-	tspWorker.postMessage(acoParameters);
+	tspController.runAll(tspParams);
 }

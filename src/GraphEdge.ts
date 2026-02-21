@@ -1,12 +1,12 @@
 import { GraphNode } from './GraphNode.js';
 import { Point } from './util/Point.js';
 
-type NodeAsObject = {
+export type NodeAsObject = {
 	id: string;
 	position: { native: Point; displayed: Point };
 	color?: string;
 };
-type EdgeAsObject = {
+export type EdgeAsObject = {
 	id: string;
 	source: NodeAsObject;
 	target: NodeAsObject;

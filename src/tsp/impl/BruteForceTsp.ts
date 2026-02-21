@@ -1,5 +1,5 @@
-import { GraphEdge } from '../GraphEdge.js';
-import { GraphNode } from '../GraphNode.js';
+import { GraphEdge } from '../../GraphEdge.js';
+import { GraphNode } from '../../GraphNode.js';
 import { AbstractTsp } from './AbstractTsp.js';
 
 declare const Go: new () => any;
@@ -15,7 +15,8 @@ export class BruteForceTsp extends AbstractTsp {
 		const wasm = await WebAssembly.instantiateStreaming(fetch('/go-src/brute-force.wasm'), go.importObject);
 		go.run(wasm.instance);
 
-		const nodes = [...this.nodes.values()];
+		// const nodes = [...this.nodes.values()];
+		const nodes = [...this.nodes.values()].slice(0, 8); //TODO: testing purposes
 		const dumbNodes = GraphNode.toWasm(nodes);
 		const resultJson = runBruteForce(JSON.stringify(dumbNodes));
 		const result = JSON.parse(resultJson) as { route: GraphEdge[]; distance: number }; // all edge nodes are dumb nodes

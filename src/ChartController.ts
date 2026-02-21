@@ -4,7 +4,7 @@ export class ChartController {
 	#element: HTMLCanvasElement;
 	#chart: CanvasRenderingContext2D;
 	#domain: { max: number; min: number };
-	#size = { width: 440, height: 180 };
+	#size = { width: 750, height: 180 };
 	#padding = 10;
 	pointRadius = 3;
 	edgeThickness = 2;

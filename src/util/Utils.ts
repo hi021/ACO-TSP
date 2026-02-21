@@ -17,4 +17,13 @@ export class Utils {
 
 	public static formatNumber = (num: number | string, delimiter = '\u00A0') =>
 		num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, delimiter);
+
+	public static stringEnumLength(enumObj: Object) {
+		return Object.keys(enumObj).length;
+	}
+
+	public static enumValueByOrdinal<T>(enumObj: T, index: number): T[keyof T] | undefined {
+		const values = Object.values(enumObj) as T[keyof T][];
+		return values[index];
+	}
 }

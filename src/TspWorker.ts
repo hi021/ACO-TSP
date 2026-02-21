@@ -7,11 +7,11 @@ import { GeographicalDistanceCalculator } from '/target/distance/GeographicalDis
 //@ts-expect-error - necessary for import resolving inside target file
 import { AttPseudoEuclideanDistanceCalculator } from '/target/distance/AttPseudoEuclideanDistanceCalculator.js';
 //@ts-expect-error - necessary for import resolving inside target file
-import { AbstractTsp } from '/target/tsp/AbstractTsp.js';
+import { AbstractTsp } from '/target/tsp/impl/AbstractTsp.js';
 //@ts-expect-error - necessary for import resolving inside target file
-import { BruteForceTsp } from '/target/tsp/BruteForceTsp.js';
+import { BruteForceTsp } from '/target/tsp/impl/BruteForceTsp.js';
 //@ts-expect-error - necessary for import resolving inside target file
-import { Aco } from '/target/tsp/aco/Aco.js';
+import { Aco } from '/target/tsp/impl/aco/Aco.js';
 
 import '/go-src/wasm_exec.js';
 
@@ -26,11 +26,13 @@ const classMap = {
 };
 
 self.onmessage = async (msg: MessageEvent<Record<string, any>>) => {
+	const executionStartTime = msg.data.executionStartTime;
+	const tspAlgorithm = msg.data.tspAlgorithm; // Warning: turns Enum into ordinal number
 	const params = parseParams(msg.data);
 	const tsp = instantiateTsp(params);
 	const result = await tsp.run();
 
-	self.postMessage({ tsp, result });
+	self.postMessage({ tsp, result, executionStartTime, tspAlgorithm });
 };
 
 function instantiateTsp(params: Record<string, any>) {

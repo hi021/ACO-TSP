@@ -1,6 +1,6 @@
-import { AbstractDistanceCalculator } from '../distance/AbstractDistanceCalculator';
-import { GraphEdge } from '../GraphEdge.js';
-import { GraphNode } from '../GraphNode.js';
+import { AbstractDistanceCalculator } from '../../distance/AbstractDistanceCalculator.js';
+import { GraphEdge } from '../../GraphEdge.js';
+import { GraphNode } from '../../GraphNode.js';
 
 export interface BasicTspParameters {
 	nodes: Map<string, GraphNode>;

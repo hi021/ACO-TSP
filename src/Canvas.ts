@@ -9,7 +9,7 @@ export class Canvas {
 	edges: GraphEdge[] = [];
 
 	#showLabels = true;
-	#size = 625;
+	#size = 750;
 	padding = 10;
 	nodeRadius = 5;
 	edgeThickness = 2;

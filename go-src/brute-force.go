@@ -41,7 +41,7 @@ func (n *GraphNode) precomputeCoordinates() {
 	n.Lon = calculateCoordinate(n.Y)
 }
 
-// //////////////////////////////////// GEO DISTANCE CALC
+// //////////////////////////////////// GEO DISTANCE CALC - hardcoded since the only brute force dataset is burma14
 const (
 	PI           = 3.141592
 	EARTH_RADIUS = 6378.388
@@ -153,9 +153,7 @@ func runBruteForce(nodes []GraphNode) Result {
 		if tSince >= 10 {
 			permPerDelta := permCount - prevPermCount
 			permPerSecond := float64(permPerDelta) / tSince
-			go func() {
-				js.Global().Get("console").Call("log", fmt.Sprintf("%d total, %.2f/s", permCount, permPerSecond))
-			}()
+			js.Global().Get("console").Call("log", fmt.Sprintf("%d total, %.2f/s", permCount, permPerSecond))
 
 			prevPermCount = permCount
 			tPrev = tCur
