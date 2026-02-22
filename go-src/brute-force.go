@@ -1,6 +1,6 @@
 //go:build js && wasm
 
-// GOOS=js GOARCH=wasm go build -o brute-force.wasm
+// GOOS=js GOARCH=wasm go build -o brute-force.wasm -tags=wasm,threads
 
 package main
 
@@ -48,6 +48,7 @@ const (
 )
 
 var distCache [][]int
+var firstEdgeDist int
 
 func initDistanceCache(nodes []GraphNode) {
 	nodeCount := len(nodes)
@@ -68,7 +69,7 @@ func calculateCoordinate(coord float64) float64 {
 
 func geoDistance(source, target *GraphNode) int {
 	if source == target {
-		return 1.0
+		return 1
 	}
 
 	dLat := target.Lat - source.Lat
@@ -84,9 +85,10 @@ func geoDistance(source, target *GraphNode) int {
 	return dist
 }
 
-func evaluateRoute(start int, nodeIndexes []int) {
-	total := 0
-	prev := start
+// TODO: to inline or try parallel channels (not sure if WASM supports them)
+func evaluateRoute(start, second int, nodeIndexes []int) {
+	total := firstEdgeDist
+	prev := second
 
 	for _, next := range nodeIndexes {
 		total += distCache[prev][next]
@@ -117,8 +119,10 @@ func runBruteForce(nodes []GraphNode) Result {
 	initDistanceCache(nodes)
 
 	start := nodeIndexes[0]
-	perm := append([]int{}, nodeIndexes[1:]...)
+	second := nodeIndexes[1]
+	perm := append([]int{}, nodeIndexes[2:]...)
 
+	firstEdgeDist = distCache[start][second]
 	bestDistance = math.MaxInt
 	bestRoute = make([]int, len(perm))
 
@@ -126,7 +130,7 @@ func runBruteForce(nodes []GraphNode) Result {
 	var tCur time.Time
 	permCount := 1
 	prevPermCount := 0
-	evaluateRoute(start, perm)
+	evaluateRoute(start, second, perm)
 
 	c := make([]int, len(perm))
 	i := 0
@@ -144,13 +148,13 @@ func runBruteForce(nodes []GraphNode) Result {
 			perm[c[i]], perm[i] = perm[i], perm[c[i]]
 		}
 
-		evaluateRoute(start, perm)
+		evaluateRoute(start, second, perm)
 		c[i]++
 
 		permCount++
-		tCur = time.Now()
-		tSince := tCur.Sub(tPrev).Seconds()
-		if tSince >= 10 {
+		if permCount-prevPermCount >= 300_000_000 {
+			tCur = time.Now()
+			tSince := tCur.Sub(tPrev).Seconds()
 			permPerDelta := permCount - prevPermCount
 			permPerSecond := float64(permPerDelta) / tSince
 			js.Global().Get("console").Call("log", fmt.Sprintf("%d total, %.2f/s", permCount, permPerSecond))
@@ -163,7 +167,13 @@ func runBruteForce(nodes []GraphNode) Result {
 	}
 
 	edges := make([]GraphEdge, 0, len(bestRoute)+1)
-	prev := start
+	prev := second
+
+	edges = append(edges, GraphEdge{
+		ID:     strconv.Itoa(i),
+		Source: &nodes[start],
+		Target: &nodes[second],
+	})
 	for i, n := range bestRoute {
 		edges = append(edges, GraphEdge{
 			ID:     strconv.Itoa(i),

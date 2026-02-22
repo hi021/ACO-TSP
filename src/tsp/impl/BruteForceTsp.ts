@@ -14,8 +14,7 @@ export class BruteForceTsp extends AbstractTsp {
 	}
 
 	public async run() {
-		// const nodes = [...this.nodes.values()];
-		const nodes = [...this.nodes.values()].slice(0, 8); //TODO: testing purposes
+		const nodes = [...this.nodes.values()];
 		if (nodes.length > BruteForceTsp.MAX_EXECUTION_NODE_COUNT) {
 			console.warn(
 				`Skipping brute force algorithm execution for dataset over ${BruteForceTsp.MAX_EXECUTION_NODE_COUNT} nodes due to the inherent time complexity`
