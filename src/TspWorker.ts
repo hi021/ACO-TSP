@@ -11,7 +11,11 @@ import { AbstractTsp } from '/target/tsp/impl/AbstractTsp.js';
 //@ts-expect-error - necessary for import resolving inside target file
 import { BruteForceTsp } from '/target/tsp/impl/BruteForceTsp.js';
 //@ts-expect-error - necessary for import resolving inside target file
+import { NearestNeighborTsp } from '/target/tsp/impl/NearestNeighborTsp.js';
+//@ts-expect-error - necessary for import resolving inside target file
 import { Aco } from '/target/tsp/impl/aco/Aco.js';
+//@ts-expect-error - necessary for import resolving inside target file
+import { SimulatedAnnealingTsp } from '/target/tsp/impl/SimulatedAnnealingTsp.js';
 
 import '/go-src/wasm_exec.js';
 
@@ -22,7 +26,9 @@ const classMap = {
 	AttPseudoEuclideanDistanceCalculator,
 	AbstractTsp,
 	BruteForceTsp,
-	Aco
+	NearestNeighborTsp,
+	Aco,
+	SimulatedAnnealingTsp
 };
 
 self.onmessage = async (msg: MessageEvent<Record<string, any>>) => {

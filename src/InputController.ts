@@ -1,5 +1,4 @@
 import { TspAlgorithm } from './tsp/TspAlgorithmEnum.js';
-import { TspController } from './tsp/TspController.js';
 import { Utils } from './util/Utils.js';
 
 export class InputController {
@@ -27,6 +26,26 @@ export class InputController {
 		distance: document.getElementById('aco-distance-input') as HTMLInputElement,
 		evaporationRate: document.getElementById('aco-evaporation-input') as HTMLInputElement,
 		depositRate: document.getElementById('aco-deposit-input') as HTMLInputElement
+	};
+
+	public saParameters = {
+		initialTemp: 1000,
+		minTemp: 0.005,
+		coolRate: 0.996,
+		iterations: 200
+	};
+
+	#saRangeInputs = {
+		initialTemp: document.getElementById('sa-initial-temp-range') as HTMLInputElement,
+		minTemp: document.getElementById('sa-min-temp-range') as HTMLInputElement,
+		coolRate: document.getElementById('sa-cool-rate-range') as HTMLInputElement,
+		iterations: document.getElementById('sa-iterations-range') as HTMLInputElement
+	};
+	#saNumericInputs = {
+		initialTemp: document.getElementById('sa-initial-temp-input') as HTMLInputElement,
+		minTemp: document.getElementById('sa-min-temp-input') as HTMLInputElement,
+		coolRate: document.getElementById('sa-cool-rate-input') as HTMLInputElement,
+		iterations: document.getElementById('sa-iterations-input') as HTMLInputElement
 	};
 
 	public readonly algorithmEnabledCheckboxes: { [tspAlgorithm in TspAlgorithm]: HTMLInputElement } = {
@@ -66,9 +85,14 @@ export class InputController {
 		this.#acoRangeInputs.depositRate.oninput = this.#acoNumericInputs.depositRate.oninput =
 			this.updateDepositRate.bind(this);
 
-		// TODO after adding missing algos
-		let i = 0;
-		for (const checkbox of Object.values(this.algorithmEnabledCheckboxes)) checkbox.checked = i++ <= 1;
+		this.#saRangeInputs.initialTemp.oninput = this.#saNumericInputs.initialTemp.oninput =
+			this.updateInitialTemp.bind(this);
+		this.#saRangeInputs.minTemp.oninput = this.#saNumericInputs.minTemp.oninput = this.updateMinTemp.bind(this);
+		this.#saRangeInputs.coolRate.oninput = this.#saNumericInputs.coolRate.oninput = this.updateCoolRate.bind(this);
+		this.#saRangeInputs.iterations.oninput = this.#saNumericInputs.iterations.oninput =
+			this.updateSaIterations.bind(this);
+
+		for (const checkbox of Object.values(this.algorithmEnabledCheckboxes)) checkbox.checked = true;
 
 		this.setAntCount();
 		this.setIterationCount();
@@ -76,8 +100,14 @@ export class InputController {
 		this.setDistancePriority();
 		this.setEvaporationRate();
 		this.setDepositRate();
+
+		this.setInitialTemp();
+		this.setMinTemp();
+		this.setCoolRate();
+		this.setSaIterations();
 	}
 
+	////// ACO
 	public updateAntCount(e: InputEvent) {
 		const value = (e.target as HTMLInputElement).value;
 		this.#acoRangeInputs.antCount.value = this.#acoNumericInputs.antCount.value = value;
@@ -138,6 +168,46 @@ export class InputController {
 			this.acoParameters.depositRate.toString();
 	}
 
+	////// SA
+	public updateInitialTemp(e: InputEvent) {
+		const value = (e.target as HTMLInputElement).value;
+		this.#saRangeInputs.initialTemp.value = this.#saNumericInputs.initialTemp.value = value;
+		this.saParameters.initialTemp = Number(value);
+	}
+	public setInitialTemp() {
+		this.#saRangeInputs.initialTemp.value = this.#saNumericInputs.initialTemp.value =
+			this.saParameters.initialTemp.toString();
+	}
+
+	public updateMinTemp(e: InputEvent) {
+		const value = (e.target as HTMLInputElement).value;
+		this.#saRangeInputs.minTemp.value = this.#saNumericInputs.minTemp.value = value;
+		this.saParameters.minTemp = Number(value);
+	}
+	public setMinTemp() {
+		this.#saRangeInputs.minTemp.value = this.#saNumericInputs.minTemp.value = this.saParameters.minTemp.toString();
+	}
+
+	public updateCoolRate(e: InputEvent) {
+		const value = (e.target as HTMLInputElement).value;
+		this.#saRangeInputs.coolRate.value = this.#saNumericInputs.coolRate.value = value;
+		this.saParameters.coolRate = Number(value);
+	}
+	public setCoolRate() {
+		this.#saRangeInputs.coolRate.value = this.#saNumericInputs.coolRate.value = this.saParameters.coolRate.toString();
+	}
+
+	public updateSaIterations(e: InputEvent) {
+		const value = (e.target as HTMLInputElement).value;
+		this.#saRangeInputs.iterations.value = this.#saNumericInputs.iterations.value = value;
+		this.saParameters.iterations = Number(value);
+	}
+	public setSaIterations() {
+		this.#saRangeInputs.iterations.value = this.#saNumericInputs.iterations.value =
+			this.saParameters.iterations.toString();
+	}
+
+	//////
 	public updateDistanceLabel(tsp: TspAlgorithm, distance?: number) {
 		this.distanceLabels[tsp].innerHTML = distance ? Utils.formatNumber(Math.round(distance)) : '-';
 	}
@@ -158,6 +228,7 @@ export class InputController {
 		for (const label of Object.values(this.executionTimeLabels)) label.innerHTML = content;
 	}
 
+	//////
 	public isAlgorithmEnabled(tsp: TspAlgorithm) {
 		return this.algorithmEnabledCheckboxes[tsp].checked;
 	}

@@ -78,6 +78,7 @@ function onLabelCheckboxChange(_: InputEvent) {
 
 function runTsps() {
 	const acoParams = inputController.acoParameters;
+	const saParams = inputController.saParameters;
 	const tspParams = {
 		antCount: acoParams.antCount,
 		distancePriority: acoParams.distancePriority,
@@ -85,6 +86,12 @@ function runTsps() {
 		pheromoneImportance: acoParams.pheromoneImportance,
 		evaporationRate: 1 - acoParams.evaporationRate,
 		maxIterations: acoParams.iterationCount,
+
+		initialTemp: saParams.initialTemp,
+		minTemp: saParams.minTemp,
+		coolRate: saParams.coolRate,
+		iterationsPerStep: saParams.iterations,
+
 		nodes: GraphNode.toMap(nodes),
 		distanceCalculator: distanceCalculator.constructor.name
 	};

@@ -12,7 +12,11 @@ export class AttPseudoEuclideanDistanceCalculator extends AbstractDistanceCalcul
 		const sourceY = source.position.native.y;
 		const targetX = target.position.native.x;
 		const targetY = target.position.native.y;
-		const distance = Math.round(Math.sqrt(((targetX - sourceX) ** 2 + (targetY - sourceY) ** 2) / 10));
+
+		const rst = Math.sqrt(((sourceX - targetX) ** 2 + (sourceY - targetY) ** 2) / 10);
+		const tst = Math.round(rst);
+		const distance = tst < rst ? tst + 1 : tst;
+
 		return this.precision ? Number(distance.toFixed(this.precision)) : distance;
 	}
 
