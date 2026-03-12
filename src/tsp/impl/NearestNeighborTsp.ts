@@ -11,9 +11,9 @@ export class NearestNeighborTsp extends AbstractTsp {
 		const nodes = Array.from(this.nodes.values());
 		if (nodes.length <= 1) return [];
 
-		// TODO: select random start node
-		const start = nodes[0];
-		const unvisited = new Set(nodes.slice(1));
+		const startIndex = Math.floor(Math.random() * nodes.length);
+		const start = nodes[startIndex];
+		const unvisited = new Set(nodes.slice(0, startIndex).concat(nodes.slice(startIndex + 1)));
 
 		let current = start;
 		let totalDistance = 0;

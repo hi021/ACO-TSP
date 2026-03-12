@@ -55,6 +55,7 @@ export class SimulatedAnnealingTsp extends AbstractTsp {
 		return this.bestRoute.route;
 	}
 
+	// TODO: make it generalized and move into the distance calculator itself
 	private computeRouteDistance(order: GraphNode[]) {
 		if (order.length <= 1) return 0;
 
