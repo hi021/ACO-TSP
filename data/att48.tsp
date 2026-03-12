@@ -1,8 +1,9 @@
 NAME : att48
-COMMENT : 48 capitals of the US (Padberg/Rinaldi)
 TYPE : TSP
+COMMENT : 48 capitals of the US (Padberg/Rinaldi)
 DIMENSION : 48
 EDGE_WEIGHT_TYPE : ATT
+OPTIMAL_DISTANCE : 10628
 NODE_COORD_SECTION
 1 6734 1453
 2 2233 10

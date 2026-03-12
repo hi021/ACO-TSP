@@ -5,7 +5,7 @@ export class NodeParser {
 	private sources: string[] = [];
 	private converter: AbstractDatasetConverter;
 
-	constructor(sources: string[] = [], canvasSize = 625, canvasPadding = 10) {
+	constructor(sources: string[] = [], canvasSize = 750, canvasPadding = 10) {
 		this.sources = sources;
 		this.converter = new DatasetConverterTsp(canvasSize - 2 * canvasPadding);
 	}

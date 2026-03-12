@@ -1,5 +1,11 @@
 import { Point } from './util/Point.js';
 
+export type DumbGraphNode = {
+	id: string;
+	x: number;
+	y: number;
+};
+
 export class GraphNode {
 	id: string;
 	color?: string;
@@ -34,6 +40,13 @@ export class GraphNode {
 		this.position.displayed = new Point(this.x * scale, this.y * scale);
 	}
 
+	public clone() {
+		const node = new GraphNode(this.id, this.position.native.x, this.position.native.y);
+		node.setPosition(this.position.displayed.x, this.position.displayed.y);
+		node.color = this.color;
+		return node;
+	}
+
 	public static toMap(nodes: GraphNode[]) {
 		const map = new Map<string, GraphNode>();
 		for (const node of nodes) map.set(node.id, node);
@@ -46,5 +59,12 @@ export class GraphNode {
 			if (node.y > maxY) maxY = node.y;
 		}
 		return maxY;
+	}
+
+	public static toWasm(nodes: GraphNode[]) {
+		const dumbNodes = new Array<DumbGraphNode>(nodes.length);
+		for (let i = 0; i < nodes.length; ++i)
+			dumbNodes[i] = { id: nodes[i].id, x: nodes[i].position.native.x, y: nodes[i].position.native.y };
+		return dumbNodes;
 	}
 }

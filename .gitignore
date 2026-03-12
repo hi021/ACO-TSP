@@ -1,1 +1,3 @@
 target
+go-src/brute-force.wasm
+go-src/wasm_exec.js

@@ -1,5 +1,5 @@
 export class Utils {
-	public static readonly TSP_WORKER_PATH = 'target/TspWorker.js';
+	public static readonly TSP_WORKER_PATH = '/target/TspWorker.js';
 
 	public static randomFromArray<T>(array: Array<T>) {
 		return array[Math.floor(Math.random() * array.length)];
@@ -11,10 +11,19 @@ export class Utils {
 		return undefined;
 	}
 
-	public static clone<K extends string | number | symbol, V>(a: Record<K, V>) {
+	public static clone<K extends PropertyKey, V>(a: Record<K, V>) {
 		return JSON.parse(JSON.stringify(a)) as Record<K, V>;
 	}
 
 	public static formatNumber = (num: number | string, delimiter = '\u00A0') =>
 		num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, delimiter);
+
+	public static stringEnumLength(enumObj: Object) {
+		return Object.keys(enumObj).length;
+	}
+
+	public static enumValueByOrdinal<T>(enumObj: T, index: number): T[keyof T] | undefined {
+		const values = Object.values(enumObj) as T[keyof T][];
+		return values[index];
+	}
 }

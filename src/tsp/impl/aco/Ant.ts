@@ -1,6 +1,6 @@
-import { AbstractDistanceCalculator } from '../distance/AbstractDistanceCalculator.js';
-import { GraphNode } from '../GraphNode.js';
-import { Utils } from '../util/Utils.js';
+import { AbstractDistanceCalculator } from '../../../distance/AbstractDistanceCalculator.js';
+import { GraphNode } from '../../../GraphNode.js';
+import { Utils } from '../../../util/Utils.js';
 import { BasicAcoParameters } from './AbstractAco.js';
 
 export class Ant {
