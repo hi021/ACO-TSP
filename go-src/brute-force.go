@@ -48,7 +48,6 @@ const (
 )
 
 var distCache [][]int
-var firstEdgeDist int
 
 func initDistanceCache(nodes []GraphNode) {
 	nodeCount := len(nodes)
@@ -86,9 +85,9 @@ func geoDistance(source, target *GraphNode) int {
 }
 
 // TODO: to inline or try parallel channels (not sure if WASM supports them)
-func evaluateRoute(start, second int, nodeIndexes []int) {
-	total := firstEdgeDist
-	prev := second
+func evaluateRoute(start int, nodeIndexes []int) {
+	total := 0
+	prev := start
 
 	for _, next := range nodeIndexes {
 		total += distCache[prev][next]
@@ -119,10 +118,8 @@ func runBruteForce(nodes []GraphNode) Result {
 	initDistanceCache(nodes)
 
 	start := nodeIndexes[0]
-	second := nodeIndexes[1]
-	perm := append([]int{}, nodeIndexes[2:]...)
+	perm := append([]int{}, nodeIndexes[1:]...)
 
-	firstEdgeDist = distCache[start][second]
 	bestDistance = math.MaxInt
 	bestRoute = make([]int, len(perm))
 
@@ -130,7 +127,7 @@ func runBruteForce(nodes []GraphNode) Result {
 	var tCur time.Time
 	permCount := 1
 	prevPermCount := 0
-	evaluateRoute(start, second, perm)
+	evaluateRoute(start, perm)
 
 	c := make([]int, len(perm))
 	i := 0
@@ -148,7 +145,7 @@ func runBruteForce(nodes []GraphNode) Result {
 			perm[c[i]], perm[i] = perm[i], perm[c[i]]
 		}
 
-		evaluateRoute(start, second, perm)
+		evaluateRoute(start, perm)
 		c[i]++
 
 		permCount++
@@ -167,13 +164,8 @@ func runBruteForce(nodes []GraphNode) Result {
 	}
 
 	edges := make([]GraphEdge, 0, len(bestRoute)+1)
-	prev := second
+	prev := start
 
-	edges = append(edges, GraphEdge{
-		ID:     strconv.Itoa(i),
-		Source: &nodes[start],
-		Target: &nodes[second],
-	})
 	for i, n := range bestRoute {
 		edges = append(edges, GraphEdge{
 			ID:     strconv.Itoa(i),
