@@ -52,7 +52,11 @@ export class TspController {
 		worker.callback?.(result);
 		worker.running = false;
 
-		if (!this.anyRunning()) this.inputController.runButton.disabled = false;
+		if (!this.anyRunning()) {
+			this.inputController.runButton.disabled = false;
+			// TODO: give this a toggleable setting/copy all results so on and so forth
+			navigator.clipboard.writeText(`${tspAlgorithm}\t${tsp.bestRoute.distance}\t${executionTime}`)
+		}
 	};
 
 	constructor(inputController: InputController, canvas: GraphCanvas) {
