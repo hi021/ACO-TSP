@@ -14,7 +14,6 @@ const dataSourcePaths = [
 	'../data/att48.tsp',
 	'../data/att532.tsp',
 	'../data/berlin52.tsp',
-	'../data/dantzig42.tsp',
 	'../data/burma14.tsp'
 ];
 
