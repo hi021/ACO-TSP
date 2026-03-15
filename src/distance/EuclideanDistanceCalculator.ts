@@ -12,8 +12,9 @@ export class EuclideanDistanceCalculator extends AbstractDistanceCalculator {
 		const sourceY = source.position.native.y;
 		const targetX = target.position.native.x;
 		const targetY = target.position.native.y;
-		const distance = Math.sqrt((targetX - sourceX) ** 2 + (targetY - sourceY) ** 2);
-		return this.precision ? Number(distance.toFixed(this.precision)) : distance;
+
+		const distance = Math.sqrt((sourceX - targetX) ** 2 + (sourceY - targetY) ** 2);
+		return Math.round(distance);
 	}
 
 	public getDistanceForEdge(edge: GraphEdge) {
